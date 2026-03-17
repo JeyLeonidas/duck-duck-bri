@@ -3,114 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Duck Duck Bri Deluxe</title>
+    <title>Duck Duck Bri: Platinum Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Syncopate:wght@700&display=swap" rel="stylesheet">
     <style>
+        :root { --gold: #ffd700; --neon: #00f2ff; --pink: #ff00ea; }
         body { 
-            background: radial-gradient(circle, #220033 0%, #050505 100%); 
-            color: white; font-family: 'Arial Black', sans-serif;
+            background: #0a0a0c; color: white; font-family: 'Arial', sans-serif;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100vh; margin: 0; overflow: hidden;
+            background-image: radial-gradient(circle at center, #1a1a2e 0%, #050505 100%);
         }
 
-        /* BANNER AREA - Uses your Winking Bri icon */
-        .header-art {
-            text-align: center; margin-bottom: 10px;
-        }
-        .header-art img { width: 120px; filter: drop-shadow(0 0 15px #ff00ff); }
-        h1 { margin: 5px 0; font-size: 24px; color: #ffd700; text-shadow: 0 0 10px gold; font-style: italic; }
+        /* PROGRESSION BAR */
+        .progress-container { width: 80%; max-width: 400px; height: 12px; background: #222; border-radius: 10px; border: 1px solid #444; margin-bottom: 20px; overflow: hidden; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--neon), var(--pink)); transition: width 0.5s ease; box-shadow: 0 0 10px var(--neon); }
 
-        .jackpot { font-size: 40px; color: #00ffcc; text-shadow: 0 0 20px #00ffcc; font-family: monospace; margin-bottom: 20px; }
+        .banner { text-align: center; position: relative; }
+        .banner img { width: 110px; filter: drop-shadow(0 0 15px var(--pink)); animation: float 3s ease-in-out infinite; }
+        .title { font-family: 'Lobster', cursive; font-size: 52px; background: linear-gradient(to bottom, #fff 30%, #ccc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(255,255,255,0.5)); margin: -10px 0 10px 0; }
 
-        /* THE MACHINE */
-        .machine {
-            background: rgba(255, 255, 255, 0.07);
-            padding: 20px; border-radius: 30px; border: 4px solid #444;
-            box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-        }
-        .reels { display: flex; gap: 15px; background: #000; padding: 15px; border-radius: 20px; }
-        .reel {
-            width: 90px; height: 120px; background: #1a1a1a;
-            border-radius: 12px; border: 1px solid #333;
+        /* THE MACHINE CASE */
+        .machine-wrap { background: #111; padding: 15px; border-radius: 35px; border: 4px solid #333; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .machine-interior { background: linear-gradient(180deg, #222 0%, #000 100%); padding: 20px; border-radius: 25px; border: 2px solid #444; }
+        .reels { display: flex; gap: 15px; }
+        .reel { 
+            width: 100px; height: 130px; background: white; border-radius: 15px; 
             display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8); border: 2px solid #000;
         }
         .reel img { width: 80%; height: auto; }
 
-        /* BUTTON */
-        #spinBtn {
-            margin-top: 30px; padding: 18px 60px;
-            font-size: 26px; font-weight: 900; color: white;
-            background: linear-gradient(180deg, #ff00ff, #800080);
-            border: none; border-radius: 50px; cursor: pointer;
-            box-shadow: 0 6px 0 #500050, 0 0 20px rgba(255,0,255,0.4);
-            transition: 0.1s;
-        }
-        #spinBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 #500050; }
-        #spinBtn:disabled { background: #333; box-shadow: none; color: #666; }
+        /* CREDITS WINDOW */
+        .credits-box { font-family: 'Syncopate', sans-serif; font-size: 20px; color: var(--gold); margin-top: 15px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
 
-        .spin-anim { animation: blurMove 0.1s infinite linear; }
-        @keyframes blurMove { from { filter: blur(2px); transform: translateY(-3px); } to { filter: blur(6px); transform: translateY(3px); } }
+        /* PROFESSIONAL SPIN BUTTON */
+        #spinBtn {
+            margin-top: 30px; width: 180px; height: 180px; border-radius: 50%;
+            border: 8px solid #222; background: radial-gradient(circle, #ff00ea, #8b008b);
+            color: white; font-family: 'Syncopate', sans-serif; font-size: 24px; cursor: pointer;
+            box-shadow: 0 10px 0 #400040, 0 0 30px rgba(255,0,234,0.3);
+            transition: 0.1s; outline: none;
+        }
+        #spinBtn:active { transform: translateY(6px); box-shadow: 0 4px 0 #400040; }
+        #spinBtn:disabled { background: #333; box-shadow: none; color: #555; }
+
+        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
+        .blur-anim { animation: blur 0.1s infinite linear; }
+        @keyframes blur { from { filter: blur(2px) brightness(1.2); transform: scale(0.98); } to { filter: blur(6px) brightness(1.5); transform: scale(1.02); } }
     </style>
 </head>
 <body>
 
-    <div class="header-art">
-        <img src="winking_bri.png">
-        <h1>✨ DUCK DUCK BRI ✨</h1>
-    </div>
-    
-    <div class="jackpot" id="jpDisp">$5,000.00</div>
+    <div class="progress-container"><div id="pBar" class="progress-bar"></div></div>
 
-    <div class="machine">
-        <div class="reels">
-            <div class="reel"><img src="bri_smile.png" id="r1"></div>
-            <div class="reel"><img src="bri_smile.png" id="r2"></div>
-            <div class="reel"><img src="bri_smile.png" id="r3"></div>
+    <div class="banner">
+        <img src="winking_bri.png">
+        <div class="title">Duck Duck Bri</div>
+    </div>
+
+    <div class="machine-wrap">
+        <div class="machine-interior">
+            <div class="reels">
+                <div class="reel"><img src="bri_smile.png" id="r1"></div>
+                <div class="reel"><img src="bri_smile.png" id="r2"></div>
+                <div class="reel"><img src="bri_smile.png" id="r3"></div>
+            </div>
+            <center><div class="credits-box" id="creditDisp">CREDITS: 100</div></center>
         </div>
     </div>
 
     <button id="spinBtn" onclick="spin()">SPIN</button>
-    <p id="msg" style="color: #00ffcc; font-size: 18px; margin-top: 20px;">READY TO WIN?</p>
+    <p id="status" style="color: var(--neon); font-weight: bold; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px;">Ready to Play</p>
 
 <script>
     const images = ['bri_smile.png', 'duck_jackpot.png', 'high_pig.png', 'high_chicken.png', 'low_seven.png', 'shocked_bri.png'];
-    let playing = false;
+    let credits = 100;
+    let progress = 0;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+
+        if (type === 'duck_jackpot.png') { // QUACK
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.2);
+        } else if (type === 'high_pig.png') { // OINK
+            osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+        } else if (type === 'high_chicken.png') { // CLUCK
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+        } else { // Generic Click
+            osc.type = 'sine'; osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+        }
+
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+    }
 
     function spin() {
-        if (playing) return;
-        playing = true;
+        if(credits < 5) return alert("Out of Credits!");
+        credits -= 5;
+        document.getElementById('creditDisp').innerText = `CREDITS: ${credits}`;
+        
         const btn = document.getElementById('spinBtn');
-        const msg = document.getElementById('msg');
+        const status = document.getElementById('status');
         btn.disabled = true;
-        msg.innerText = "LUCK IS SPINNING...";
+        status.innerText = "SPINNING...";
 
         const reels = [document.getElementById('r1'), document.getElementById('r2'), document.getElementById('r3')];
-        reels.forEach(r => r.classList.add('spin-anim'));
+        reels.forEach(r => r.classList.add('blur-anim'));
 
-        // Pick winners
-        const results = [
-            images[Math.floor(Math.random() * images.length)],
-            images[Math.floor(Math.random() * images.length)],
-            images[Math.floor(Math.random() * images.length)]
-        ];
+        const res = [images[Math.floor(Math.random()*6)], images[Math.floor(Math.random()*6)], images[Math.floor(Math.random()*6)]];
 
         setTimeout(() => {
             reels.forEach((img, i) => {
                 setTimeout(() => {
-                    img.classList.remove('spin-anim');
-                    img.src = results[i];
+                    img.classList.remove('blur-anim');
+                    img.src = res[i];
+                    playSound(res[i]);
                     if (i === 2) {
-                        playing = false;
                         btn.disabled = false;
-                        if(results[0] === results[1] && results[1] === results[2]) {
-                            msg.innerText = "💰 MEGA WIN!!! 💰";
-                        } else {
-                            msg.innerText = "SPIN AGAIN!";
-                        }
+                        checkWin(res);
                     }
-                }, i * 500);
+                }, i * 400);
             });
         }, 1000);
+    }
+
+    function checkWin(res) {
+        const status = document.getElementById('status');
+        if (res[0] === res[1] && res[1] === res[2]) {
+            credits += 50;
+            progress += 25;
+            status.innerText = "WINNER! +50 CREDITS";
+            if(progress >= 100) {
+                progress = 0;
+                status.innerText = "FRENZY MODE ACTIVATED!";
+            }
+        } else {
+            status.innerText = "TRY AGAIN!";
+        }
+        document.getElementById('pBar').style.width = progress + "%";
+        document.getElementById('creditDisp').innerText = `CREDITS: ${credits}`;
     }
 </script>
 </body>
