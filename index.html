@@ -3,150 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Duck Duck Bri: High Roller Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Monoton&family=Righteous&display=swap" rel="stylesheet">
+    <title>Duck Duck Bri: Sensory Deluxe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background: radial-gradient(circle at center, #2b0044 0%, #000 100%);
-            color: white; font-family: 'Righteous', cursive;
+        :root { --neon-gold: #ffd700; --neon-pink: #ff00ff; --neon-blue: #00f2ff; }
+        body {
+            background: #050505; color: white; font-family: 'Orbitron', sans-serif;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100vh; margin: 0; overflow: hidden;
         }
 
-        /* 5-LINE DISPLAY INDICATORS */
-        .paylines-info { font-size: 12px; color: #00ffcc; margin-bottom: 10px; text-transform: uppercase; }
+        /* PROGRESSION METER */
+        .prog-wrap { width: 90%; max-width: 500px; height: 25px; background: #111; border: 2px solid #333; border-radius: 20px; margin-bottom: 10px; overflow: hidden; }
+        .prog-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink)); transition: width 0.3s ease; box-shadow: 0 0 15px var(--neon-blue); }
 
-        .machine-container {
-            position: relative; background: #111; padding: 20px; border-radius: 20px;
-            border: 5px solid #ffd700; box-shadow: 0 0 40px #ff00ff;
-        }
+        /* INTERACTIVE BRI */
+        .character-box { height: 120px; text-align: center; margin-bottom: 10px; }
+        #briAvatar { width: 100px; filter: drop-shadow(0 0 10px var(--neon-pink)); transition: transform 0.2s; }
+        .float { animation: floatAnim 3s ease-in-out infinite; }
+        @keyframes floatAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        .reels-grid { 
-            display: grid; grid-template-columns: repeat(3, 110px); 
-            grid-template-rows: repeat(3, 110px); gap: 10px; 
-            background: #000; padding: 10px; border-radius: 10px;
-            position: relative;
-        }
+        /* THE 9-LINE GRID */
+        .machine-frame { background: #1a1a1a; padding: 15px; border-radius: 20px; border: 5px solid #444; box-shadow: 0 0 40px #000; }
+        .grid { display: grid; grid-template-columns: repeat(3, 100px); grid-template-rows: repeat(3, 100px); gap: 10px; background: #000; padding: 10px; border-radius: 10px; }
+        .slot { background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid #222; }
+        .slot img { width: 80%; height: auto; }
 
-        .symbol-slot {
-            background: white; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden; border: 2px solid #333;
-        }
-        .symbol-slot img { width: 80%; height: auto; }
+        /* SCOREBOARD */
+        .stats { display: flex; gap: 20px; margin-top: 20px; font-size: 20px; }
+        .stat-box { background: #111; padding: 10px 20px; border-radius: 10px; border: 1px solid var(--neon-gold); min-width: 120px; text-align: center; }
+        .label { font-size: 10px; color: var(--neon-gold); display: block; margin-bottom: 5px; }
 
-        /* NEON WIN LINES */
-        .win-line {
-            position: absolute; background: #00ffcc; box-shadow: 0 0 15px #00ffcc;
-            display: none; z-index: 10;
-        }
-
-        .header { text-align: center; margin-bottom: 15px; }
-        .header h1 { font-family: 'Monoton', cursive; font-size: 35px; color: #ff00ff; margin: 0; }
-
+        /* BUTTON */
         #spinBtn {
-            margin-top: 25px; padding: 15px 50px; font-size: 24px;
-            background: linear-gradient(#ff00ff, #800080); color: white;
-            border: none; border-radius: 50px; cursor: pointer;
-            box-shadow: 0 5px 0 #440044, 0 0 20px #ff00ff;
+            margin-top: 25px; padding: 15px 60px; font-size: 24px; font-family: 'Bungee Inline';
+            background: linear-gradient(var(--neon-pink), #800080); color: white; border: none;
+            border-radius: 50px; cursor: pointer; box-shadow: 0 6px 0 #400040; transition: 0.1s;
         }
-        #spinBtn:active { transform: translateY(3px); box-shadow: 0 2px 0 #440044; }
+        #spinBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 #400040; }
+        #spinBtn:disabled { filter: grayscale(1); opacity: 0.5; }
 
-        .blur { filter: blur(5px); transform: scale(0.9); transition: 0.1s; }
+        .spin-blur { filter: blur(4px) brightness(1.5); }
+        .win-glow { border: 3px solid var(--neon-gold) !important; animation: pulse 0.3s infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>DUCK DUCK BRI</h1>
-        <div style="color: gold;">96% RTP • MULTI-LINE PAY</div>
+    <div class="prog-wrap"><div id="pBar" class="prog-bar"></div></div>
+
+    <div class="character-box">
+        <img src="bri_smile.png" id="briAvatar" class="float">
+        <div id="gameMsg" style="color: var(--neon-blue); font-size: 14px; margin-top: 5px;">DUCK DUCK WIN!</div>
     </div>
 
-    <div class="paylines-info">Lines 1-5 Active</div>
-
-    <div class="machine-container">
-        <div class="reels-grid" id="grid">
-            <div class="symbol-slot"><img src="bri_smile.png" id="s0"></div>
-            <div class="symbol-slot"><img src="duck_jackpot.png" id="s1"></div>
-            <div class="symbol-slot"><img src="high_pig.png" id="s2"></div>
-            <div class="symbol-slot"><img src="high_chicken.png" id="s3"></div>
-            <div class="symbol-slot"><img src="low_seven.png" id="s4"></div>
-            <div class="symbol-slot"><img src="shocked_bri.png" id="s5"></div>
-            <div class="symbol-slot"><img src="bri_smile.png" id="s6"></div>
-            <div class="symbol-slot"><img src="duck_jackpot.png" id="s7"></div>
-            <div class="symbol-slot"><img src="high_pig.png" id="s8"></div>
+    <div class="machine-frame">
+        <div class="grid" id="mainGrid">
+            <div class="slot"><img id="i0" src="low_seven.png"></div>
+            <div class="slot"><img id="i1" src="low_seven.png"></div>
+            <div class="slot"><img id="i2" src="low_seven.png"></div>
+            <div class="slot"><img id="i3" src="low_seven.png"></div>
+            <div class="slot"><img id="i4" src="low_seven.png"></div>
+            <div class="slot"><img id="i5" src="low_seven.png"></div>
+            <div class="slot"><img id="i6" src="low_seven.png"></div>
+            <div class="slot"><img id="i7" src="low_seven.png"></div>
+            <div class="slot"><img id="i8" src="low_seven.png"></div>
         </div>
-        <div id="line1" class="win-line" style="top: 55px; left: 10px; width: 350px; height: 4px;"></div>
-        <div id="line2" class="win-line" style="top: 175px; left: 10px; width: 350px; height: 4px;"></div>
-        <div id="line3" class="win-line" style="top: 295px; left: 10px; width: 350px; height: 4px;"></div>
     </div>
 
-    <div id="status" style="margin-top: 15px; color: #ffd700; height: 20px;">WINNER PAID IN DUCKS</div>
-    <button id="spinBtn" onclick="spin()">SPIN</button>
+    <div class="stats">
+        <div class="stat-box"><span class="label">CREDITS</span><span id="creditDisp">500</span></div>
+        <div class="stat-box"><span class="label">LAST WIN</span><span id="winDisp">0</span></div>
+    </div>
+
+    <button id="spinBtn" onclick="handleSpin()">SPIN</button>
 
 <script>
     const imgs = ['bri_smile.png', 'duck_jackpot.png', 'high_pig.png', 'high_chicken.png', 'low_seven.png', 'shocked_bri.png'];
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    let credits = 500;
+    let progress = 0;
+    const audio = new (window.AudioContext || window.webkitAudioContext)();
 
-    function playSound(freq, type, dur) {
-        const osc = ctx.createOscillator();
-        const g = ctx.createGain();
-        osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        g.gain.setValueAtTime(0.1, ctx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
-        osc.connect(g); g.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + dur);
+    function beep(freq, type, dur) {
+        const o = audio.createOscillator();
+        const g = audio.createGain();
+        o.type = type; o.frequency.setValueAtTime(freq, audio.currentTime);
+        g.gain.setValueAtTime(0.1, audio.currentTime);
+        o.connect(g); g.connect(audio.destination);
+        o.start(); o.stop(audio.currentTime + dur);
     }
 
-    function spin() {
-        if (ctx.state === 'suspended') ctx.resume();
-        document.querySelectorAll('.win-line').forEach(l => l.style.display = 'none');
+    async function handleSpin() {
+        if (credits < 10) return;
+        if (audio.state === 'suspended') audio.resume();
+
+        credits -= 10;
+        document.getElementById('creditDisp').innerText = credits;
+        document.getElementById('gameMsg').innerText = "SPINNING...";
+        document.getElementById('briAvatar').src = 'winking_bri.png';
+        document.querySelectorAll('.slot').forEach(s => s.classList.remove('win-glow'));
+
         const btn = document.getElementById('spinBtn');
         btn.disabled = true;
-        
-        const slots = [];
+
+        const results = [];
         for(let i=0; i<9; i++) {
-            const el = document.getElementById('s'+i);
-            el.classList.add('blur');
-            slots.push(el);
+            const img = document.getElementById('i' + i);
+            img.classList.add('spin-blur');
+            const res = imgs[Math.floor(Math.random() * imgs.length)];
+            results.push(res);
+
+            setTimeout(() => {
+                img.src = res;
+                img.classList.remove('spin-blur');
+                beep(200 + (i*50), 'sine', 0.05);
+                if(i === 8) finalizeSpin(results);
+            }, 600 + (i * 100));
         }
-
-        // 96% RTP Logic: Pre-calculate if this spin should be a winner
-        const winRNG = Math.random();
-        let gridResult = [];
-
-        if (winRNG < 0.40) { // 40% chance of a guaranteed line win
-            const winner = imgs[Math.floor(Math.random()*6)];
-            gridResult = Array(9).fill().map(() => imgs[Math.floor(Math.random()*6)]);
-            gridResult[3] = winner; gridResult[4] = winner; gridResult[5] = winner; // Middle row win
-        } else {
-            gridResult = Array(9).fill().map(() => imgs[Math.floor(Math.random()*6)]);
-        }
-
-        setTimeout(() => {
-            slots.forEach((s, i) => {
-                setTimeout(() => {
-                    s.classList.remove('blur');
-                    s.src = gridResult[i];
-                    playSound(150 - (i*10), 'sine', 0.1);
-                    if(i === 8) {
-                        btn.disabled = false;
-                        checkMultiWin(gridResult);
-                    }
-                }, i * 100);
-            });
-        }, 800);
     }
 
-    function checkMultiWin(g) {
-        // Simple Horizontal Middle Line Check for now
-        if(g[3] === g[4] && g[4] === g[5]) {
-            document.getElementById('line2').style.display = 'block';
-            playSound(523.25, 'square', 0.5); // "C5" High winning note
-            document.getElementById('status').innerText = "JACKPOT MATCH!";
+    function finalizeSpin(res) {
+        let winTotal = 0;
+        const lines = [
+            [0,1,2], [3,4,5], [6,7,8], // Horizontals
+            [0,3,6], [1,4,7], [2,5,8], // Verticals
+            [0,4,8], [2,4,6]           // Diagonals
+        ];
+
+        lines.forEach(line => {
+            if(res[line[0]] === res[line[1]] && res[line[1]] === res[line[2]]) {
+                winTotal += 50;
+                line.forEach(idx => document.getElementById('i'+idx).parentElement.classList.add('win-glow'));
+            }
+        });
+
+        const btn = document.getElementById('spinBtn');
+        btn.disabled = false;
+
+        if(winTotal > 0) {
+            document.getElementById('briAvatar').src = 'shocked_bri.png';
+            document.getElementById('gameMsg').innerText = "HUGE WIN!";
+            tickUp(winTotal);
+            progress = Math.min(progress + 20, 100);
+            document.getElementById('pBar').style.width = progress + "%";
+            beep(500, 'square', 0.3); beep(600, 'square', 0.3);
         } else {
-            document.getElementById('status').innerText = "SPIN AGAIN!";
+            document.getElementById('briAvatar').src = 'bri_smile.png';
+            document.getElementById('gameMsg').innerText = "TRY AGAIN!";
         }
+    }
+
+    function tickUp(amount) {
+        let currentWin = 0;
+        const interval = setInterval(() => {
+            currentWin += 2;
+            credits += 2;
+            document.getElementById('winDisp').innerText = currentWin;
+            document.getElementById('creditDisp').innerText = credits;
+            beep(800, 'sine', 0.02);
+            if(currentWin >= amount) clearInterval(interval);
+        }, 30);
     }
 </script>
 </body>
