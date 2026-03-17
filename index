@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duck Duck Bri: Grand Jackpot 🦆✨</title>
+    <style>
+        :root { --neon: #00f2ff; --gold: #ffd700; --bg: #0b0b0e; --bri-pink: #ff69b4; --alert-red: #ff3e3e; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        
+        /* Progressive Jackpot Display */
+        .jackpot-container { text-align: center; margin-bottom: 10px; padding: 10px; border: 2px solid var(--alert-red); border-radius: 10px; background: rgba(255, 62, 62, 0.1); }
+        .jackpot-display { font-size: 40px; color: var(--alert-red); text-shadow: 0 0 20px #ff0000; font-weight: bold; letter-spacing: 1.5px; }
+        .jackpot-label { font-size: 14px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+        /* Stats & Level Bar */
+        .top-bar { display: flex; gap: 30px; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 12px 40px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .stat span { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; }
+        .val { font-size: 22px; font-weight: bold; color: var(--gold); }
+
+        .xp-container { width: 320px; height: 8px; background: #222; border-radius: 10px; margin-bottom: 25px; border: 1px solid #333; position: relative; }
+        #xpBar { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2ff, #7000ff); border-radius: 10px; transition: width 0.4s; box-shadow: 0 0 10px var(--neon); }
+
+        /* Pro Slot Machine Area */
+        .machine { background: linear-gradient(180deg, #333, #111); padding: 20px; border-radius: 25px; border: 5px solid #444; box-shadow: 0 25px 60px rgba(0,0,0,0.9); transition: box-shadow 0.3s; }
+        .reels-container { display: flex; gap: 12px; background: #000; padding: 15px; border-radius: 15px; border: 2px solid #222; overflow: hidden; }
+        .reel { width: 100px; height: 130px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid #ddd; }
+        
+        /* Image Display & Blur Animation */
+        .reel img { max-width: 85%; max-height: 85%; object-fit: contain; transform-origin: center; transition: filter 0.1s; }
+        .reel img.blur { filter: blur(5px); animation: spinVertical 0.1s infinite linear; }
+        
+        @keyframes spinVertical {
+            0% { transform: translateY(-8px); }
+            100% { transform: translateY(8px); }
+        }
+
+        /* Sensory Win Visuals */
+        .win-glow { box-shadow: 0 0 50px var(--bri-pink) !important; border-color: var(--bri-pink) !important; transition: 0.1s; }
+        #msg { font-weight: bold; color: var(--neon); text-transform: uppercase; letter-spacing: 1px; min-height: 24px; text-shadow: 0 0 5px var(--neon); transition: 0.1s; }
+        
+        .controls { margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        #spinBtn { background: linear-gradient(180deg, #ffea00, #ff9100); color: #000; border: none; padding: 18px 80px; font-size: 26px; font-weight: 900; border-radius: 50px; cursor: pointer; box-shadow: 0 6px #b36b00; transition: 0.1s; text-transform: uppercase; }
+        #spinBtn:active { transform: translateY(4px); box-shadow: 0 2px #b36b00; }
+        #spinBtn:disabled { background: #444; box-shadow: none; color: #777; }
+    </style>
+</head>
+<body>
+
+    <div class="jackpot-container">
+        <div class="jackpot-display" id="jackpotVal">$5,000.00</div>
+        <div class="jackpot-label">Duck Duck Bri Grand Jackpot</div>
+    </div>
+
+    <div class="top-bar">
+        <div class="stat"><span>Credits</span><div id="balance" class="val">$100</div></div>
+        <div class="stat"><span>Level</span><div id="level" class="val">1</div></div>
+    </div>
+    
+    <div class="xp-container"><div id="xpBar"></div></div>
+
+    <div class="machine" id="slotMachine">
+        <div class="reels-container">
+            <div id="r1" class="reel"><img src="bri_smile.png" id="imgR1"></div>
+            <div id="r2" class="reel"><img src="bri_smile.png" id="imgR2"></div>
+            <div id="r3" class="reel"><img src="bri_smile.png" id="imgR3"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div id="msg">BIG WINS, BRI!</div>
+        <button id="spinBtn" onclick="playGame()">SPIN</button>
+    </div>
+
+<script>
+    // Asset Management: Replace placeholders with your final cropped images.
+    const symbols = {
+        bri: '<img src="bri_smile.png" alt="Bri">',
+        jackpot: '<img src="duck_jackpot.png" alt="Duck Jackpot">',
+        pig: '<img src="high_pig.png" alt="High Pig">',
+        hen: '<img src="high_chicken.png" alt="High Chicken">',
+        low: '<img src="low_seven.png" alt="Low Seven">'
+    };
+
+    // Game state
+    let state = { balance: 100, xp: 0, level: 1, jackpot: 5000, spinning: false };
+    
+    // Sound Engine
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playNote(freq, type, duration, vol = 0.1) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playGame() {
+        if (state.balance < 1 || state.spinning) return;
+
+        // Reset UI from last spin
+        document.getElementById('slotMachine').classList.remove('win-glow');
+        document.getElementById('msg').style.color = "var(--neon)";
+        document.getElementById('msg').style.textShadow = "0 0 5px var(--neon)";
+
+        state.spinning = true;
+        state.balance -= 1;
+        state.jackpot += 0.25;
+        document.getElementById('spinBtn').disabled = true;
+        updateUI("SPINNING...");
+        playNote(150, 'square', 0.1, 0.05); // Spin start
+
+        const reelImgs = [document.getElementById('imgR1'), document.getElementById('imgR2'), document.getElementById('imgR3')];
+        reelImgs.forEach(img => img.classList.add('blur'));
+
+        const rng = Math.floor(Math.random() * 1000) + 1;
+        let win = 0;
+        let result = [];
+        let message = "TRY AGAIN";
+        let specialWin = false;
+
+        // 96% RTP Casino Math (Weighted Probability)
+        if (rng <= 10) { 
+            // 1% Chance: DUCK DUCK BRI (Grand Jackpot!)
+            result = [symbols.jackpot, symbols.jackpot, symbols.bri]; 
+            win = state.jackpot; 
+            state.jackpot = 1000;
+            message = "🏆✨ DUCK DUCK BRI! ✨🏆";
+            specialWin = true;
+        } else if (rng <= 30) { 
+            // 2% Chance: Triple Ducks
+            result = [symbols.jackpot, symbols.jackpot, symbols.jackpot]; 
+            win = 50; 
+            message = "Mega Ducks! +$50";
+        } else if (rng <= 100) { 
+            // 7% Chance: Pig Combo
+            result = [symbols.pig, symbols.pig, symbols.jackpot].sort(() => Math.random() - 0.5);
+            win = 10;
+            message = "Lucky Pigs! +$10";
+        } else if (rng <= 180) { 
+            // 8% Chance: Triple Chicken
+            result = [symbols.hen, symbols.hen, symbols.hen];
+            win = 5;
+            message = "Chicken Dinner! +$5";
+        } else {
+            // Losing Spin: Mix the symbols
+            result = [symbols.bri, symbols.jackpot, symbols.low].sort(() => Math.random() - 0.5);
+        }
+
+        // Staggered stop logic
+        setTimeout(() => {
+            reelImgs.forEach((img, i) => {
+                setTimeout(() => {
+                    img.classList.remove('blur');
+                    // We must use .innerHTML on the parent container, not .src on the <img>
+                    img.parentElement.innerHTML = result[i]; 
+                    playNote(200 + (i * 100), 'sine', 0.1, 0.05); // Stop sound
+                    
+                    if (i === 2) finalize(win, message, specialWin);
+                }, i * 400);
+            });
+        }, 800);
+    }
+
+    function finalize(win, msg, specialWin) {
+        state.balance += win;
+        state.xp += 25; 
+        
+        if (specialWin) {
+            // Sensory Fanfare & Vibration
+            playNote(523.25, 'triangle', 0.4, 0.3);
+            setTimeout(() => playNote(659.25, 'triangle', 0.4, 0.3), 150);
+            setTimeout(() => playNote(783.99, 'triangle', 0.4, 0.3), 300);
+            setTimeout(() => playNote(1046.50, 'triangle', 0.8, 0.3), 450);
+            
+            // Visual Overload
+            document.getElementById('slotMachine').classList.add('win-glow');
+            document.getElementById('msg').style.color = "var(--bri-pink)";
+            document.getElementById('msg').style.textShadow = "0 0 20px var(--bri-pink)";
+        
+        } else if (win > 0) {
+            playNote(523.25, 'triangle', 0.3, 0.1);
+            setTimeout(() => playNote(783.99, 'triangle', 0.3, 0.1), 150);
+        }
+
+        if (state.xp >= 100) {
+            state.level++;
+            state.xp = 0;
+            state.balance += 20;
+            msg = "🔥 LEVEL UP, BRI! $20 BONUS! 🔥";
+            playNote(880, 'sawtooth', 0.6, 0.1);
+        }
+
+        state.spinning = false;
+        document.getElementById('spinBtn').disabled = false;
+        updateUI(msg);
+    }
+
+    function updateUI(m) {
+        document.getElementById('balance').innerText = `$${Math.floor(state.balance)}`;
+        document.getElementById('jackpotVal').innerText = `$${state.jackpot.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        document.getElementById('level').innerText = state.level;
+        document.getElementById('xpBar').style.width = `${state.xp}%`;
+        document.getElementById('msg').innerText = m;
+    }
+</script>
+</body>
+</html>
